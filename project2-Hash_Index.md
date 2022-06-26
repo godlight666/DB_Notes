@@ -1,3 +1,26 @@
+---
+title: Project #1 - Buffer Pool实现
+categories: [DataBase, CMU15-445, 实验笔记]
+tags:
+- DataBase
+- CMU15-445
+- 实验笔记
+---
+
+# Extendible Hash Index实现
+
+实现一个hash表用来存储数据。有key和value，hash函数对key生效，使用的xxHash。
+
+整体结构：一个hash table对象由以下结构组成
+
+1. 一个directory_page，存储着hashtable元数据，以及索引数组，索引数组存储着该key所在的bucket所在的page的pageid。**它的空间由project 1的buffer_pool分配的Page中的data分配**
+2. 很多个bucket_page，存储着数据pair，包括key和value。一个key可以对应多个不同的value，访问时会返回该key的所有value。无需。**它的空间也由project 1的buffer_pool分配的Page中的data分配**
+3. 上面两个page都和buffer pool中的page不同，**前者并不是后者的子类。而是buffer pool中的page的data部分存放着这两种page的数据**。
+
+
+
+## 总结
+
 1. 从buffer_pool中得到的page是缓冲池中的page，并不是hash table中directory page或者bucket page的父类，hash table的各个page应该放在page的data部分，所以要用GetData()。
 
    ```c++
