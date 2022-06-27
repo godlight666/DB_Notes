@@ -9,6 +9,8 @@ tags:
 
 # Extendible Hash Index实现
 
+[Project #2 - Extendible Hash Index | CMU 15-445/645 :: Intro to Database Systems (Fall 2021)](https://15445.courses.cs.cmu.edu/fall2021/project2/)
+
 实现一个hash表用来存储数据。有key和value，hash函数对key生效，使用的xxHash。
 
 整体结构：一个hash table对象由以下结构组成
@@ -16,6 +18,10 @@ tags:
 1. 一个directory_page，存储着hashtable元数据，以及索引数组，索引数组存储着该key所在的bucket所在的page的pageid。**它的空间由project 1的buffer_pool分配的Page中的data分配**
 2. 很多个bucket_page，存储着数据pair，包括key和value。一个key可以对应多个不同的value，访问时会返回该key的所有value。无需。**它的空间也由project 1的buffer_pool分配的Page中的data分配**
 3. 上面两个page都和buffer pool中的page不同，**前者并不是后者的子类。而是buffer pool中的page的data部分存放着这两种page的数据**。
+
+所以根据结构，我们需要先实现directory_page类和bucket_page类，然后再实现hash_table类，通过调用前两个类来实现这个类。
+
+## Hash Table Directory Page
 
 
 
