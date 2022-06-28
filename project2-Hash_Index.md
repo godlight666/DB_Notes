@@ -23,7 +23,23 @@ tags:
 
 ## Hash Table Directory Page
 
+关键数据结构：
 
+```c++
+// 存储当前的global depth
+uint32_t global_depth_{0};
+// 存储各个bucket的localdepth
+uint8_t local_depths_[DIRECTORY_ARRAY_SIZE];
+// 存储各个bucket所在的pageid
+page_id_t bucket_page_ids_[DIRECTORY_ARRAY_SIZE];
+```
+
+关键实现逻辑：
+
+1. hash索引：先对key进行hash，再取得到的值的后*global_depth_*位，这就相当于mod directory的当前长度。**我们这里实现取低位**。
+2. IncrGlobalDepth: 将dir数组扩充为原来的两倍，**由于新的一半都是旧的一半的兄弟（即在上一个global_depth时索引相等）**，所以直接让新的一半的local_depth和bucket_page都复制旧的一半就好了。
+3. DecrGlobalDepth: 直接减小global_depth就可以，就会失去对另一半的访问，相当于释放了。没有对数组进行操作。
+4. SetBucketPageId：首先需要检查要设置的bucket_idx是否超过了dir的范围，如果是则需要增大global_depth。然后设置该bucket的pageid时，
 
 ## 总结
 
