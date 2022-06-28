@@ -13,7 +13,7 @@ tags:
 
 关键数据结构：
 
-```c++
+```cpp
 // 用队列来维护replacer中的frame，新来的从头部插入，最旧的在末尾
 std::list<frame_id_t> queue_;
 // 用来存放该frame在queue中的位置，方便当Pin调用时将该frame从replacer队列中移除
@@ -32,7 +32,7 @@ std::unordered_map<frame_id_t, std::list<frame_id_t>::iterator> map_;
 
 关键数据结构：
 
-```c++
+```cpp
 /** Array of buffer pool pages. 即buffer_pool数组，数组中各个元素指向各个page。该数组的索引即为frame_id*/
 Page *pages_;
 /** Page table for keeping track of buffer pool pages. 存放page_id到frame_id的映射*/
@@ -55,7 +55,7 @@ std::list<frame_id_t> free_list_;
 
 关键数据结构：
 
-```c++
+```cpp
 // 指针数组，存放指向各个BufferPool的指针
 BufferPoolManagerInstance **bpms_;
 // BufferPool的数目
@@ -67,8 +67,8 @@ size_t num_instances_;
 1. 其实就一个逻辑，根据pageid轮流调用不同的bufferpool，从而分担workload，提高并行度。即将page放在第pageid%num_instances个bufferpool中，类似哈希表。
 
 2. 每个buffer_pool都有一个mutex，即latch，在bufferpool的每个函数上加锁来避免多线程带来的问题.
-
-   ```c++
+   
+   ```cpp
    // 加锁，并自动释放
    std::scoped_lock lock{latch_};
    ```
