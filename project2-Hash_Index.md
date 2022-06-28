@@ -1,5 +1,5 @@
 ---
-title: Project #1 - Buffer Pool实现
+title: Project2 - Extendible Hash Index
 categories: [DataBase, CMU15-445, 实验笔记]
 tags:
 - DataBase
