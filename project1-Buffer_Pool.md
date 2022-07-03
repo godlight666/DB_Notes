@@ -1,5 +1,6 @@
 ---
 title: [Project1 - Buffer Pool]
+date: 2022-06-15
 categories: [DataBase, CMU15-445, 实验笔记]
 tags:
 - DataBase
@@ -8,6 +9,12 @@ tags:
 ---
 
 # Buffer Pool实现
+
+Buffer Pool 是数据库用来管理内存空间的结构。后面的数据存储都构建在Buffer Pool上层。
+
+通过Buffer Pool分配pages进行写入，并将修改后的pages写入到磁盘。读取数据时，通过将磁盘数据读入Buffer Pool分配的page中（即内存），再进行相关操作。
+
+Buffer Pool也会根据置换算法（这里用的LRU）来将磁盘中的Page读入或写出。
 
 ## LRU Replacer
 

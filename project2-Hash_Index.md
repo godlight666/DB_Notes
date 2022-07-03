@@ -1,5 +1,6 @@
 ---
 title: Project2 - Extendible Hash Index
+date: 2022-06-25
 categories: [DataBase, CMU15-445, 实验笔记]
 tags:
 - DataBase
