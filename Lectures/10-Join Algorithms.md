@@ -111,13 +111,13 @@ IO次数为 M + (m * C)。
 
 <img src="https://raw.githubusercontent.com/godlight666/picgo/main/screenshot_9.png" title="" alt="" width="750">
 
-### Boom Fliter优化
+### Bloom Fliter优化
 
-很巧妙。Boom Fliter是一个bitmap，可以用很小的空间，很快的速度查询到**是不是没有这个值**（即它说有不一定有，但是它说没有肯定没有）。
+很巧妙。Bloom Fliter是一个bitmap，可以用很小的空间，很快的速度查询到**是不是没有这个值**（即它说有不一定有，但是它说没有肯定没有）。
 
 [Boom Fliter原理](https://zhuanlan.zhihu.com/p/50587308)
 
-所以表S遍历时，先去Boom Fliter中查询，如果没有，就不用去Hash Table中查了。否则，再进一步去Hash Table中查。
+所以表S遍历时，先去Bloom Fliter中查询，如果没有，就不用去Hash Table中查了。否则，再进一步去Hash Table中查。
 
 ### Grace Hash Join
 
