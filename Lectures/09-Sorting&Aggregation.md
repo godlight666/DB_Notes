@@ -75,7 +75,7 @@ tags:
 
 #### 阶段一 Partition
 
-思想就是先用一个hash来将所有的数据分区。由于同一个key得到的hash就是一样的，所以会分在同一个区。当Buffer pool有B个pages时，用B-1个pages来装分区的，用剩下的一个来存放结果。所以第一个hash会得到B-1个分区。
+思想就是先用一个hash来将所有的数据分区。由于同一个key得到的hash就是一样的，所以会分在同一个区。当Buffer pool有B个pages时，用B-1个pages来装分区的，用剩下的一个来存放输入数据。所以第一个hash会得到B-1个分区。
 
 #### 阶段二 Rehash
 
