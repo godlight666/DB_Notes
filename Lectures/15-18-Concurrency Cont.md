@@ -68,6 +68,8 @@
 
 InnoDB中MVCC的实现原理，参考[MVCC实现原理是什么](https://www.bilibili.com/video/BV1864y1976i/?share_source=copy_web&vd_source=f120d4d54b426372a2c10ab0b8eea38d)
 
+MVCC与spanner中的snapshot isolation类似。
+
 ### 使用的结构
 
 1. 每个tuple后有三个隐藏字段：
