@@ -63,3 +63,54 @@
 1. re-execute scan：在commit的时候，重新执行一遍看结果是不是这样
 2. predicate lock：select的时候上共享锁，update，insert，delete的时候上排他锁。就是对一个条件上锁，锁住所有相关的tuple，负担很大，很少用。
 3. **index locking：如果涉及的属性有索引，就直接在索引上加锁，这样跟该属性相关的tuple的增加或删除都会要获取这个索引的锁。如果还没有对应的值，就在索引的间隙上加锁，即间隙锁。如果不涉及任何index，就要保证任何已有的tuple不能改变成符合条件的tuple，任何符合条件的tuple不能被增加或者删除。**
+
+## MVCC（Multi-Version Concurrency Control）
+
+InnoDB中MVCC的实现原理，参考[MVCC实现原理是什么](https://www.bilibili.com/video/BV1864y1976i/?share_source=copy_web&vd_source=f120d4d54b426372a2c10ab0b8eea38d)
+
+### 使用的结构
+
+1. 每个tuple后有三个隐藏字段：
+
+   1. ROW_ID：隐藏的主键，自动生成的。
+   2. TRX_ID：创建或者最后一次修改这个tuple的ID。
+   3. ROLL_PTR：回滚指针，指向tuple的上一个版本，位于undo_log中。
+2. undo log：回滚日志，记录着旧版本的数据，方便回滚。当进行insert时，产生的undo log只在事务回滚的时候需要，所以在事务提交后可以立刻被丢弃。但是当进行update或者delete时，事务回滚和read view中都需要这个旧版本记录，所以不能立刻丢弃。只有在快照读和事务回滚用不到的时候，会有一个专门的purge线程来清楚这个旧版本记录。
+
+   ![1676769881202](image/15-18-ConcurrencyCont/1676769881202.png)
+3. read view：
+
+   1. 有三个全局属性：
+      1. trx_list：一个数值列表，维护生成read view时活跃的事务id列表。
+      2. up_limit_id：最小的当前活跃事务id。
+      3. low_limit_id：下一个要分配的事务id号，即当前系统已经分配的最大事务id+1（最大事务包括活跃的，提交的，abort的）
+   2. 在事务进行快照读操作时候产生的读视图。在事务执行快照读的那一刻，生成一个数据系统当前的快照，记录并维护系统当前活跃的事务id。
+   3. 用来做可见性判断。就是当事务执行快照读的时候，根据read view的几个值，来判断能读到某个值的哪个版本。
+
+### 具体操作
+
+read view的具体比较规则：
+
+1. 遍历每个tuple的各个版本（利用ROLL_PTR遍历，从新到旧），利用各个版本中的TRX_ID判断三次，都失败则进入下一个版本
+2. 如果DB_TRX_ID<up_limit_id，说明这个版本在生成快照的时候已经提交了，可以读，否则进行下一步。
+3. 如果DB_TRX_ID>=low_limit_id，说明这个版本在生成快照的时候还不存在，不能读，进入下一个版本，否则进行下一步。
+4. 如果DB_TRX_ID在当前活跃列表里面，说明还没提交，不能读，进入下一个版本，否则可以读。
+
+### 不同隔离级别的实现
+
+变量都在read view那三个全局属性，所以要实现RC或者RR就利用生成read view的时机不同来实现。
+
+1. 实现RC：每次快照读的时候都生成当前的read view，就会更新那三个全局属性，就能每次快照读都读到当前提交的事务的数据。
+2. 实现RR：第一次快照读生成了read_view后，之后的每次快照读都用第一次的那个read view，使得每次快照读能读到的数据都和第一次快照读时一样。
+
+### 能解决的问题
+
+有读读，读写，写写问题，MVCC解决读写问题，但是不能解决写写问题。
+
+读写问题包括：脏读取，不可重复读，幻像读(只解决了快照读的幻像读问题)。
+
+写写问题，比如丢失更新，没法解决。
+
+参考：[MVCC能否解决幻读 - xuwc - 博客园 (cnblogs.com)](https://www.cnblogs.com/xuwc/p/13873293.html)
+
+[mysql间隙锁，next-key lock,row锁加锁范围分析_mysql 间隙锁 范围_forwardMyLife的博客-CSDN博客](https://blog.csdn.net/lucky_ly/article/details/125252075)
