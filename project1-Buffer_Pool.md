@@ -7,14 +7,24 @@ tags:
 - CMU15-445
 - 实验笔记
 ---
-
 # Buffer Pool实现
+
+DBMS的Storage主要就是解决两个问题：
+
+1. 怎么将数据库数据以文件的形式存储在磁盘中。
+2. 如何控制内存和磁盘之间的数据交换。Buffer Pool用来解决这个问题。
 
 Buffer Pool 是数据库用来管理内存空间的结构。后面的数据存储都构建在Buffer Pool上层。
 
 通过Buffer Pool分配pages进行写入，并将修改后的pages写入到磁盘。读取数据时，通过将磁盘数据读入Buffer Pool分配的page中（即内存），再进行相关操作。
 
 Buffer Pool也会根据置换算法（这里用的LRU）来将磁盘中的Page读入或写出。
+
+## 整体结构
+
+1. Buffer Pool 在内存中，由一个个frame组成，buffer pool的整个空间是一直在的，即这块内存空间数据库不会释放让操作系统回收，不管有没有有效page。
+2. 内存中还有一个Page Table，它负责维护pageid->frame id的映射，从而能够访问page。（还有一个page directory，是负责pageid->location of disk）。
+3. 一个LRU Replacer，负责标记哪个frame的page可以先置换出去。
 
 ## LRU Replacer
 
@@ -72,9 +82,8 @@ size_t num_instances_;
 关键实现逻辑：
 
 1. 其实就一个逻辑，根据pageid轮流调用不同的bufferpool，从而分担workload，提高并行度。即将page放在第pageid%num_instances个bufferpool中，类似哈希表。
-
 2. 每个buffer_pool都有一个mutex，即latch，在bufferpool的每个函数上加锁来避免多线程带来的问题.
-   
+
    ```cpp
    // 加锁，并自动释放
    std::scoped_lock lock{latch_};
